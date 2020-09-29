@@ -18,7 +18,7 @@ ext_modules = [
 
 setup(
     name='ibloom',
-    version='0.0.1',
+    version='0.0.2.1',
     packages=find_packages(),
     ext_modules=ext_modules,
     install_requires=['Cython'],
@@ -28,6 +28,8 @@ setup(
     author_email='imanux@sina.com',
     keywords='Cython bloom filter redis',
     description='Python library which implements a Redis-backed Bloom filter.',
+    long_description=open('README.md').read(),
+    long_description_content_type="text/markdown",
     classifiers=[
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
