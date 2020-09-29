@@ -1,0 +1,13 @@
+include LICENSE
+include Makefile
+include README.md
+include requirements.txt
+include requirements_test.txt
+include setup.py
+include tox.ini
+include ibloom/bloom.c
+include ibloom/bloom.h
+include ibloom/bloom.pxd
+include ibloom/Makefile
+include ibloom/murmur.c
+include ibloom/ibloom.pyx
