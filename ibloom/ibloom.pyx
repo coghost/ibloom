@@ -48,9 +48,9 @@ cdef class IBloom(object):
     def __cinit__(self, key, capacity, error_rate, host='127.0.0.1', port=6379,
                   password='', db=0, codec=1):
         self.codec = codec
-        key = self.str2bytes(key)
-        host = self.str2bytes(host)
-        password = self.str2bytes(password)
+        key = self._str2bytes(key)
+        host = self._str2bytes(host)
+        password = self._str2bytes(password)
 
         self.key = key
         if bloom.init_pyrebloom(&self.context, self.key, capacity, error_rate, host, port, password, db, codec):
@@ -59,7 +59,7 @@ cdef class IBloom(object):
     def __dealloc__(self):
         bloom.free_pyrebloom(&self.context)
 
-    def str2bytes(self, raw):
+    def _str2bytes(self, raw):
         if not self.codec:
             return raw
         if not isinstance(raw, bytes):
@@ -67,10 +67,11 @@ cdef class IBloom(object):
         return raw
 
     def delete(self):
+        """ this will delete the key """
         bloom.delete(&self.context)
 
     def add(self, value):
-        value = self.str2bytes(value)
+        value = self._str2bytes(value)
         r = bloom.add_one(&self.context, value, len(value))
         if r < 0:
             raise IBloomException(self.context.ctxt.errstr)
@@ -78,25 +79,39 @@ cdef class IBloom(object):
         return r
 
     def update(self, values):
-        values = [self.str2bytes(x) for x in values]
+        values = [self._str2bytes(x) for x in values]
         r = [bloom.add(&self.context, value, len(value)) for value in values]
         r = bloom.add_complete(&self.context, len(values))
         if r < 0:
             raise IBloomException(self.context.ctxt.errstr)
-
         return r
 
-    def intersection(self, values):
-        values = [self.str2bytes(x) for x in values]
+    def update_difference(self, values):
+        """ this is a combination of difference and update,
+        will get diff first, and then update, and return diffs
+        """
+        diffs = self.difference(values)
+        self.update(diffs)
+        return diffs
+
+    def _find_many(self, values):
+        values = [self._str2bytes(x) for x in values]
         r = [bloom.check(&self.context, value, len(value)) for value in values]
         r = [bloom.check_next(&self.context) for _ in range(len(values))]
         if min(r) < 0:
             raise IBloomException(self.context.ctxt.errstr)
+        return zip(values, r)
 
-        return [v.decode() for v, included in zip(values, r) if included]
+    def intersection(self, values):
+        results = self._find_many(values)
+        return [v.decode() for v, included in results if included]
+
+    def difference(self, values):
+        results = self._find_many(values)
+        return [v.decode() for v, included in results if not included]
 
     def contains(self, value):
-        value = self.str2bytes(value)
+        value = self._str2bytes(value)
         bloom.check(&self.context, value, len(value))
         r = bloom.check_next(&self.context)
         if r < 0:
@@ -110,6 +125,13 @@ cdef class IBloom(object):
 
     def __and__(self, values):
         return self.intersection(values)
+
+    def __xor__(self, values):
+        return self.difference(values)
+
+    def __ixor__(self, values):
+        self.update_difference(values)
+        return self
 
     def __iadd__(self, values):
         self.update(values)
