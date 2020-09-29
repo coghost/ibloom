@@ -1,5 +1,6 @@
 /* Copyright (c) 2011 SEOmoz
  * Copyright (c) 2016 leovp
+ * Copyright (c) 2020 Hex.Li
  * 
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -29,26 +30,29 @@
 #include <hiredis/hiredis.h>
 
 /* Some return values */
-enum {
+enum
+{
     PYREBLOOM_OK = 0,
     PYREBLOOM_ERROR = -1
 };
 
 // And now for some redis stuff
-typedef struct {
-	uint32_t        capacity;
-    uint32_t        hashes;
-    uint32_t        num_keys;
-	uint64_t        bits;
-	double          error;
-	uint32_t      * seeds;
-	char          * key;
-    char          * password;
-	redisContext  * ctxt;
-    char         ** keys;
+typedef struct
+{
+    int8_t codec;
+    uint32_t capacity;
+    uint32_t hashes;
+    uint32_t num_keys;
+    uint64_t bits;
+    double error;
+    uint32_t *seeds;
+    char *key;
+    char *password;
+    redisContext *ctxt;
+    char **keys;
 } pyrebloomctxt;
 
-int init_pyrebloom(pyrebloomctxt *ctxt, char *key, uint32_t capacity, double error, char *host, uint32_t port, char *password, uint32_t db);
+int init_pyrebloom(pyrebloomctxt *ctxt, char *key, uint32_t capacity, double error, char *host, uint32_t port, char *password, uint32_t db, int8_t codec);
 int free_pyrebloom(pyrebloomctxt *ctxt);
 
 int add(pyrebloomctxt *ctxt, const char *data, uint32_t data_size);
@@ -58,7 +62,7 @@ int add_complete(pyrebloomctxt *ctxt, uint32_t count);
 int check(pyrebloomctxt *ctxt, const char *data, uint32_t data_size);
 int check_next(pyrebloomctxt *ctxt);
 
-int delete(pyrebloomctxt *ctxt);
+int delete (pyrebloomctxt *ctxt);
 
 uint64_t hash(const char *data, uint32_t data_size, uint64_t seed, uint64_t bits);
 

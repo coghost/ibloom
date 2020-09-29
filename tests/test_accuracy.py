@@ -7,7 +7,7 @@ from redis import Redis
 from ibloom import IBloom, IBloomException
 
 HOST = '127.0.0.1'
-PORT = 6383
+PORT = 6379
 
 
 def sample_strings(length, count):

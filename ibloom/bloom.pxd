@@ -1,5 +1,6 @@
 # Copyright (c) 2011 SEOmoz
 # Copyright (c) 2016 leovp
+# Copyright (c) 2020 Hex.Li
 # 
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -32,6 +33,7 @@ cdef extern from "bloom.h":
         char *obuf
 
     ctypedef struct pyrebloomctxt:
+        bint             codec
         uint32_t        capacity
         uint32_t        hashes
         uint32_t        num_keys
@@ -45,7 +47,7 @@ cdef extern from "bloom.h":
 
     bint init_pyrebloom(pyrebloomctxt *ctxt, unsigned char *key,
         uint32_t capacity, float error, char *host, uint32_t port,
-        char *password, uint32_t db)
+        char *password, uint32_t db, bint codec)
     bint free_pyrebloom(pyrebloomctxt *ctxt)
 
     bint add(pyrebloomctxt *ctxt, char *data, uint32_t data_size)

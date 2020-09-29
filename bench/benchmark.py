@@ -10,7 +10,7 @@ capacity = count * 2
 error = 0.1
 
 HOST = '127.0.0.1'
-PORT = 6383
+PORT = 6379
 
 print('Generating %i random test words' % (count * 2))
 start = -time.time()

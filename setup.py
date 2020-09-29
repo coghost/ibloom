@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 ext_files = ['ibloom/bloom.c']
 kwargs = {}
 
@@ -19,14 +19,15 @@ ext_modules = [
 setup(
     name='ibloom',
     version='0.0.1',
+    packages=find_packages(),
+    ext_modules=ext_modules,
+    install_requires=['Cython'],
     url='https://github.com/coghost/ibloom',
     license='MIT',
     author='Hex.Li',
     author_email='imanux@sina.com',
-    keywords='cython bloom filter redis',
+    keywords='Cython bloom filter redis',
     description='Python library which implements a Redis-backed Bloom filter.',
-    ext_modules=ext_modules,
-    install_requires=['cython'],
     classifiers=[
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',

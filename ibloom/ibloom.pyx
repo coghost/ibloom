@@ -35,6 +35,7 @@ class IBloomException(Exception):
 cdef class IBloom(object):
     cdef bloom.pyrebloomctxt context
     cdef bytes               key
+    cdef bint                codec
 
     property bits:
         def __get__(self):
@@ -44,20 +45,23 @@ cdef class IBloom(object):
         def __get__(self):
             return self.context.hashes
 
-    def __cinit__(self, key, capacity, error, host='127.0.0.1', port=6379,
-                  password='', db=0):
+    def __cinit__(self, key, capacity, error_rate, host='127.0.0.1', port=6379,
+                  password='', db=0, codec=1):
+        self.codec = codec
         key = self.str2bytes(key)
         host = self.str2bytes(host)
         password = self.str2bytes(password)
 
         self.key = key
-        if bloom.init_pyrebloom(&self.context, self.key, capacity, error, host, port, password, db):
+        if bloom.init_pyrebloom(&self.context, self.key, capacity, error_rate, host, port, password, db, codec):
             raise IBloomException(self.context.ctxt.errstr)
 
     def __dealloc__(self):
         bloom.free_pyrebloom(&self.context)
 
     def str2bytes(self, raw):
+        if not self.codec:
+            return raw
         if not isinstance(raw, bytes):
             return bytes(raw, encoding='utf8')
         return raw
